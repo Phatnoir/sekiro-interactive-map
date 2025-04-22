@@ -1,6 +1,6 @@
 # Sekiro Completion Map
 
-An interactive web-based map for tracking progression and collectibles in *Sekiro: Shadows Die Twice*.
+A simple interactive web-based map for tracking progression and collectibles in *Sekiro: Shadows Die Twice*.
 
 ## Credits
 Original map by Reddit user [/u/lane_cruiser](https://www.reddit.com/user/lane_cruiser/)  
@@ -8,27 +8,24 @@ Source post: [Updated Map Chart for future playthroughs](https://www.reddit.com/
 
 ## Overview
 
-A simple browser-based tool that overlays checkboxes on Sekiro's world map. Track items, bosses, and upgrades as you progress through the game.
+Browser-based tool that overlays checkboxes on Sekiro's world map. Track items, bosses, and upgrades as you play.
 
 ## Features
 
-- Responsive layout for different screen sizes
-- Checkboxes mapped directly to key in-game locations
-- Automatically saves progress between sessions using localStorage
+- Progress tracking with percentage and count display
+- Clear All button with confirmation dialog
+- Export/Import functionality to backup progress or use on different devices
+- Automatically saves between sessions using localStorage
+- Responsive design for all screen sizes
 
 ## Usage
 
-1. Download both files (`sekiro_map_checklist_responsive.html` and `Sekiro locations.png`) into the same folder.
-2. Open the HTML file in your browser.
-3. Click checkboxes to mark your progress.
-4. Progress is saved automatically and will persist between visits.
+1. Download both files (`sekiro_map_checklist.html` and `Sekiro locations.png`) to the same folder
+2. Open the HTML file in your browser
+3. Click checkboxes on the map to mark your progress
+4. Use the controls at the bottom to manage your progress
 
 ## Requirements
 
-- A modern browser with JavaScript enabled
-- Both files must remain in the same directory
-
-## Notes
-
-- Your progress is stored locally in the browser (`localStorage`)
-- Clearing site data or switching browsers will reset your checklist
+- Modern browser with JavaScript enabled
+- Both files must be in the same directory

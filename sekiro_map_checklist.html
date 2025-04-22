@@ -1,13 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sekiro Completion Map (Responsive)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sekiro Completion Map</title>
 <style>
   body {
     margin: 0;
     background-color: #000;
+    color: #f0d6a6;
+    font-family: 'Times New Roman', serif;
   }
   .map-container {
     position: relative;
@@ -21,21 +23,76 @@
     display: block;
   }
   .checkbox {
-	position: absolute;
-	transform: translate(-50%, -50%);
-	width: 20px;
-	height: 20px;
-	opacity: 0.2;
-	z-index: 10;
-	}
-
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    opacity: 0.2;
+    z-index: 10;
+    cursor: pointer;
+  }
   .checkbox:checked {
-	opacity: 1;
-	}
-
+    opacity: 1;
+  }
+  .controls {
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid #564e36;
+  }
+  .btn {
+    background-color: #3a3224;
+    color: #f0d6a6;
+    border: 1px solid #564e36;
+    padding: 8px 16px;
+    margin: 0 5px;
+    cursor: pointer;
+    font-family: 'Times New Roman', serif;
+    font-size: 16px;
+  }
+  .btn:hover {
+    background-color: #564e36;
+  }
+  .progress-bar {
+    width: 100%;
+    max-width: 500px;
+    height: 20px;
+    background-color: #3a3224;
+    margin: 15px auto;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background-color: #8f774a;
+    width: 0%;
+    transition: width 0.3s;
+  }
+  .progress-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+  }
+  .header {
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid #564e36;
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #f0d6a6;
+  }
 </style>
 </head>
 <body>
+<div class="header">
+  <h1>Sekiro: Shadows Die Twice - Completion Tracker</h1>
+</div>
+
 <div class="map-container">
   <img class="map-image" src="Sekiro locations.png" alt="Sekiro Map">
   <input type="checkbox" class="checkbox" id="cb-0" style="left: 42.68%; top: 5.30%;">
@@ -129,15 +186,120 @@
   <input type="checkbox" class="checkbox" id="cb-88" style="left: 62.70%; top: 95.75%;">
   <input type="checkbox" class="checkbox" id="cb-89" style="left: 42.24%; top: 95.83%;">
 </div>
+
+<div class="controls">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+    <div class="progress-text" id="progress-text">0 / 90 (0%)</div>
+  </div>
+  <button class="btn" id="clear-all">Clear All</button>
+  <button class="btn" id="export-progress">Export Progress</button>
+  <button class="btn" id="import-progress">Import Progress</button>
+</div>
+
 <script>
+  // Get all elements we'll work with
   const checkboxes = document.querySelectorAll('.checkbox');
+  const clearAllBtn = document.getElementById('clear-all');
+  const exportBtn = document.getElementById('export-progress');
+  const importBtn = document.getElementById('import-progress');
+  const progressFill = document.getElementById('progress-fill');
+  const progressText = document.getElementById('progress-text');
+
+  // Load checkboxes from localStorage
+  function loadCheckboxes() {
+    checkboxes.forEach(cb => {
+      const id = cb.id;
+      cb.checked = localStorage.getItem(id) === "true";
+    });
+    updateProgress();
+  }
+
+  // Save checkbox state to localStorage
+  function saveCheckbox(checkbox) {
+    localStorage.setItem(checkbox.id, checkbox.checked);
+    updateProgress();
+  }
+
+  // Update progress bar and text
+  function updateProgress() {
+    const total = checkboxes.length;
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const percentage = Math.round((checked / total) * 100);
+    
+    progressFill.style.width = percentage + '%';
+    progressText.textContent = `${checked} / ${total} (${percentage}%)`;
+  }
+
+  // Clear all checkboxes
+  clearAllBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear all progress?')) {
+      checkboxes.forEach(cb => {
+        cb.checked = false;
+        localStorage.setItem(cb.id, false);
+      });
+      updateProgress();
+    }
+  });
+
+  // Export progress as JSON
+  exportBtn.addEventListener('click', () => {
+    const data = {};
+    checkboxes.forEach(cb => {
+      data[cb.id] = cb.checked;
+    });
+    
+    const dataStr = JSON.stringify(data);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = 'sekiro-progress.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  });
+
+  // Import progress from JSON
+  importBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = function() {
+        try {
+          const data = JSON.parse(reader.result);
+          
+          Object.keys(data).forEach(key => {
+            localStorage.setItem(key, data[key]);
+          });
+          
+          loadCheckboxes();
+          alert('Progress imported successfully!');
+        } catch (error) {
+          alert('Error importing progress: ' + error.message);
+        }
+      };
+      
+      reader.readAsText(file);
+    };
+    
+    input.click();
+  });
+
+  // Checkbox event listeners
   checkboxes.forEach(cb => {
-    const id = cb.id;
-    cb.checked = localStorage.getItem(id) === "true";
     cb.addEventListener('change', () => {
-      localStorage.setItem(id, cb.checked);
+      saveCheckbox(cb);
     });
   });
+
+  // Initialize on page load
+  loadCheckboxes();
 </script>
 </body>
 </html>
